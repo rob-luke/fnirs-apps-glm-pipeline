@@ -25,9 +25,9 @@ You can modify the behaviour of the script using the options below.
 
 |                  | Required | Default | Note                                         |
 |------------------|----------|---------|----------------------------------------------|
-| short_regression | optional | NA      | Include short channels as regressor.         |
-| export_drifts    | optional | 0       | Export the drift coefficents in csv.         |
-| export_shorts    | optional | end     | Export the short channel coefficents in csv. |
+| short_regression | optional | True    | Include short channels as regressor.         |
+| export_drifts    | optional | False   | Export the drift coefficents in csv.         |
+| export_shorts    | optional | False   | Export the short channel coefficents in csv. |
 
 
 For example
