@@ -8,4 +8,4 @@ services:
     image: fnirs-apps/glmpipeline
     volumes:
       - /Volumes/MassStorage2TB/rluke/Repositories/BIDS-NIRS-Tapping/:/bids_dataset
-    command: ["--export_drifts", "False"]
+    command: []
