@@ -38,6 +38,15 @@ For example
 docker run -v /path/to/data/:/bids_dataset ghcr.io/rob-luke/fnirs-apps-glm-pipeline/app --short_regression=True --export_shorts=True
 ```
 
+## Updating
+
+To update to the latest version run.
+
+```bash
+docker pull ghcr.io/rob-luke/fnirs-apps-glm-pipeline/app
+```
+
+
 Acknowledgements
 ----------------
 
