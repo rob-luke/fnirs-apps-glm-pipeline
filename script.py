@@ -154,8 +154,6 @@ for id in ids:
             df_cha = df_cha.append(cha)
         except FileNotFoundError:
             print(f"Unable to process {b_path.fpath}")
-        else:
-            print(f"Unknown error processing {b_path.fpath}")
 
 df_cha = df_cha.query("Chroma in ['hbo']")
 ch_model = smf.mixedlm("theta ~ -1 + ch_name:Chroma:Condition",
