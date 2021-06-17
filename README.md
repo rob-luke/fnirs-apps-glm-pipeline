@@ -23,11 +23,13 @@ You can modify the behaviour of the script using the options below.
 
 ## Arguments
 
-|                  | Required | Default | Note                                         |
-|------------------|----------|---------|----------------------------------------------|
-| short_regression | optional | True    | Include short channels as regressor.         |
-| export_drifts    | optional | False   | Export the drift coefficents in csv.         |
-| export_shorts    | optional | False   | Export the short channel coefficents in csv. |
+|                   | Required | Default | Note                                                |
+|-------------------|----------|---------|-----------------------------------------------------|
+| short_regression  | optional | True    | Include short channels as regressor.                |
+| export_drifts     | optional | False   | Export the drift coefficents in csv.                |
+| export_shorts     | optional | False   | Export the short channel coefficents in csv.        |
+| participant_label | optional | []      | Participants to process. Default is to process all. |
+| task_label.       | optional | []      | Tasks to process. Default is to process all.        |
 
 
 For example
