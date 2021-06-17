@@ -148,6 +148,7 @@ for id in ids:
 
             if args.export_drifts is False:
                 cha = cha[~cha.Condition.str.contains("drift")]
+                cha = cha[~cha.Condition.str.contains("constant")]
             if args.export_shorts is False:
                 cha = cha[~cha.Condition.str.contains("short")]
             cha.to_csv(p_out.fpath, index=False)
