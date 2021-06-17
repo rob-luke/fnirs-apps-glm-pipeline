@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import numpy as np
+import sys
 import argparse
 import pandas as pd
 from mne_bids import BIDSPath, read_raw_bids
@@ -12,7 +13,7 @@ from mne_nirs.channels import get_short_channels, get_long_channels
 from mne_nirs.utils._io import glm_to_tidy
 from mne.utils import warn
 import statsmodels.formula.api as smf
-from mne_nirs.statistics import statsmodels_to_results
+from mne_nirs.statistics import statsmodels_to_results, glm_region_of_interest
 
 __version__ = "v0.0.1"
 
@@ -56,17 +57,19 @@ ids = []
 # only for a subset of subjects
 if args.participant_label:
     ids = args.participant_label
+    print(f"Processing requested participants: {ids}")
 # for all subjects
 else:
     subject_dirs = glob(op.join(args.bids_dir, "sub-*"))
     ids = [subject_dir.split("-")[-1] for
            subject_dir in subject_dirs]
-    print(f"No participants specified, processing {ids}")
+    print(f"No participants specified, processing: {ids}")
 
 
 tasks = []
 if args.task_label:
     tasks = args.task_label
+    print(f"Processing requested tasks: {tasks}")
 else:
     all_snirfs = glob("/bids_dataset/**/*_nirs.snirf", recursive=True)
     for a in all_snirfs:
@@ -83,12 +86,12 @@ else:
 
 def individual_analysis(bids_path, ID, srate=0.6, short=True):
 
-    raw_intensity = read_raw_bids(bids_path=bids_path, verbose=False)
+    raw_intensity = read_raw_bids(bids_path=bids_path, verbose=True)
 
     # Convert signal to haemoglobin and resample
     raw_od = optical_density(raw_intensity)
     raw_haemo = beer_lambert_law(raw_od)
-    raw_haemo.resample(srate)
+    raw_haemo.resample(srate, verbose=True)
 
     # Cut out just the short channels for creating a GLM repressor
     sht_chans = get_short_channels(raw_haemo)
@@ -101,6 +104,7 @@ def individual_analysis(bids_path, ID, srate=0.6, short=True):
                          "See https://github.com/rob-luke/"
                          "fnirs-apps-glm-pipeline/issues/1")
     stim_dur = raw_haemo.annotations.duration[0]
+    print(f"Fitting HRF with duration {stim_dur} seconds.")
 
     # Create a design matrix
     design_matrix = make_first_level_design_matrix(raw_haemo,
@@ -121,7 +125,17 @@ def individual_analysis(bids_path, ID, srate=0.6, short=True):
     # Convert to uM for nicer plotting below.
     cha["theta"] = [t * 1.e6 for t in cha["theta"]]
 
-    return raw_haemo, cha
+    # Define channels in each region of interest
+    # Then generate the correct indices for each pair
+    groups = dict(AllChannels=range(len(raw_haemo.ch_names)))
+    # Compute region of interest results from channel data
+    roi = pd.DataFrame()
+    for idx, col in enumerate(design_matrix.columns):
+        roi = roi.append(glm_region_of_interest(glm_est, groups, idx, col))
+    roi["ID"] = ID  # Add the participant ID to the dataframe
+    roi["theta"] = [t * 1.e6 for t in roi["theta"]]
+
+    return raw_haemo, cha, roi
 
 
 ########################################
@@ -130,6 +144,7 @@ def individual_analysis(bids_path, ID, srate=0.6, short=True):
 
 print(" ")
 df_cha = pd.DataFrame()
+df_roi = pd.DataFrame()
 for id in ids:
     for task in tasks:
         b_path = BIDSPath(subject=id, task=task,
@@ -137,7 +152,7 @@ for id in ids:
                           datatype="nirs", suffix="nirs",
                           extension=".snirf")
         try:
-            raw, cha = individual_analysis(b_path, id,
+            raw, cha, roi = individual_analysis(b_path, id,
                                            short=args.short_regression)
             p_out = b_path.update(root='/bids_dataset/derivatives/'
                                        'fnirs-apps-glm-pipeline/',
@@ -153,12 +168,27 @@ for id in ids:
                 cha = cha[~cha.Condition.str.contains("short")]
             cha.to_csv(p_out.fpath, index=False)
             df_cha = df_cha.append(cha)
+            df_roi = df_roi.append(roi)
         except FileNotFoundError:
             print(f"Unable to process {b_path.fpath}")
 
+print("Computing group level channel results")
 df_cha = df_cha.query("Chroma in ['hbo']")
 ch_model = smf.mixedlm("theta ~ -1 + ch_name:Chroma:Condition",
                        df_cha, groups=df_cha["ID"]).fit(method='nm')
 ch_model_df = statsmodels_to_results(ch_model)
 group_path = '/bids_dataset/derivatives/fnirs-apps-glm-pipeline/group.csv'
 ch_model_df.to_csv(group_path)
+
+
+print("Computing group level result per conditions as single ROI.")
+
+df_roi = df_roi[~df_roi.Condition.str.contains("drift")]
+df_roi = df_roi[~df_roi.Condition.str.contains("constant")]
+df_roi = df_roi[~df_roi.Condition.str.contains("short")]
+
+roi_model = smf.mixedlm("theta ~ -1 + ROI:Condition:Chroma",
+                        df_roi, groups=df_roi["ID"]).fit(method='nm')
+sys.stdout = open("/bids_dataset/derivatives/fnirs-apps-glm-pipeline/stats.txt", "w")
+print(roi_model.summary())
+sys.stdout.close()
