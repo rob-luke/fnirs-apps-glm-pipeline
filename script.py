@@ -96,7 +96,7 @@ def individual_analysis(bids_path, ID, srate=0.6, short=True):
 
     if ~np.all(raw_haemo.annotations.duration ==
                raw_haemo.annotations.duration[0]):
-        raise ValueError("Support is only available for experiments where"
+        raise ValueError("Support is only available for experiments where "
                          "all durations are the same. "
                          "See https://github.com/rob-luke/"
                          "fnirs-apps-glm-pipeline/issues/1")
