@@ -13,6 +13,7 @@ RUN pip install https://codeload.github.com/rob-luke/mne-bids/zip/nirs
 RUN pip install https://github.com/nilearn/nilearn/archive/main.zip
 RUN pip install mne-nirs
 RUN pip install h5py
+RUN pip install statsmodels
 
 COPY script.py /usr/bin/script.py
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import numpy as np
 import argparse
+import pandas as pd
 from mne_bids import BIDSPath, read_raw_bids
 from glob import glob
 import os.path as op
@@ -10,6 +11,8 @@ from mne_nirs.experimental_design import make_first_level_design_matrix
 from mne_nirs.channels import get_short_channels, get_long_channels
 from mne_nirs.utils._io import glm_to_tidy
 from mne.utils import warn
+import statsmodels.formula.api as smf
+from mne_nirs.statistics import statsmodels_to_results
 
 __version__ = "v0.0.1"
 
@@ -93,9 +96,10 @@ def individual_analysis(bids_path, ID, srate=0.6, short=True):
 
     if ~np.all(raw_haemo.annotations.duration ==
                raw_haemo.annotations.duration[0]):
-        warn("Support is only available for experiment where all durations "
-             "are the same. See https://github.com/rob-luke/"
-             "fnirs-apps-glm-pipeline/issues/1 ")
+        raise ValueError("Support is only available for experiments where"
+                         "all durations are the same. "
+                         "See https://github.com/rob-luke/"
+                         "fnirs-apps-glm-pipeline/issues/1")
     stim_dur = raw_haemo.annotations.duration[0]
 
     # Create a design matrix
@@ -125,6 +129,7 @@ def individual_analysis(bids_path, ID, srate=0.6, short=True):
 ########################################
 
 print(" ")
+df_cha = pd.DataFrame()
 for id in ids:
     for task in tasks:
         b_path = BIDSPath(subject=id, task=task,
@@ -146,7 +151,15 @@ for id in ids:
             if args.export_shorts is False:
                 cha = cha[~cha.Condition.str.contains("short")]
             cha.to_csv(p_out.fpath, index=False)
+            df_cha = df_cha.append(cha)
         except FileNotFoundError:
             print(f"Unable to process {b_path.fpath}")
         else:
             print(f"Unknown error processing {b_path.fpath}")
+
+df_cha = df_cha.query("Chroma in ['hbo']")
+ch_model = smf.mixedlm("theta ~ -1 + ch_name:Chroma:Condition",
+                       df_cha, groups=df_cha["ID"]).fit(method='nm')
+ch_model_df = statsmodels_to_results(ch_model)
+group_path = '/bids_dataset/derivatives/fnirs-apps-glm-pipeline/group.csv'
+ch_model_df.to_csv(group_path)
