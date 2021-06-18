@@ -48,6 +48,12 @@ To update to the latest version run.
 docker pull ghcr.io/rob-luke/fnirs-apps-glm-pipeline/app
 ```
 
+Or to run a specific version:
+
+```bash
+docker run -v /path/:/bids_dataset ghcr.io/rob-luke/fnirs-apps-glm-pipeline/app:v1.4.2
+```
+
 
 Acknowledgements
 ----------------
