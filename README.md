@@ -4,15 +4,8 @@
 
 http://fnirs-apps.org : Portable fNIRS neuroimaging pipelines that work with BIDS datasets.
 
-This app runs a GLM pipeline on your data.
-The pipeline converts the data to optical density and then applies the Beer Lambert Law conversion.
-The data is resampled to 0.6 Hz.
-A GLM is applied (TODO: expose more parameters here) using the duration of the stimulus convolved with a glover HRF.
-If `--short_regression` is specified the short channels will be added as regressors to the design matrix for the GLM computation.
-Drift components will be added to the design matrix using a cosine model including frequencies up to 0.01 Hz (TODO: make user specified parameter).
+This app runs a GLM pipeline on your data. see details of the pipeline below.
 
-The results of the GLM will be exported per subject as a tidy csv file per run.
-A summary is generated of the group level results by running a mixed effects model on the data and exported as a text file.
 
 ## Usage
 
@@ -22,6 +15,24 @@ docker run -v /path/to/data/:/bids_dataset ghcr.io/rob-luke/fnirs-apps-glm-pipel
 
 By default the app will process all subject and tasks.
 You can modify the behaviour of the script using the options below.
+
+
+## Pipeline details
+
+1. The pipeline converts the data to optical density.
+2. Then applies the Beer Lambert Law conversion.
+4. The data is resampled
+    - to 0.6 Hz. (TODO: make optional variable)
+6. A GLM is applied  using the duration of the stimulus convolved with a glover HRF.
+    - (TODO: expose more parameters here)
+    - If `--short_regression` is specified the short channels will be added as regressors to the design matrix for the GLM computation.
+    - Drift components will be added to the design matrix using a cosine model including frequencies up to 0.01 Hz (TODO: make user specified parameter).
+7. The results of the GLM will be exported per subject as a tidy csv file per run.
+8. A mixed effects model is then run on the individual data to produce a summary result
+    - First, for each subject the channels are combined to a sinle region of interest
+    - The model is then applied that includes condition and chromaphore as a factor with id as a random variable
+    - A summary is exported as a text file
+
 
 ## Arguments
 
