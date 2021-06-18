@@ -38,7 +38,7 @@ jobs:
         run: docker tag ghcr.io/${GITHUB_REPOSITORY}/${GITHUB_REF##*/} ghcr.io/rob-luke/fnirs-apps-glm-pipeline/app:${{ env.RELEASE_VERSION }}
 
       - name: Push image to github for versioned release
-        run: docker push ghcr.io/rob-luke/fnirs-apps-sourcedata2bids/app:${{ env.RELEASE_VERSION }}
+        run: docker push ghcr.io/rob-luke/fnirs-apps-glm-pipeline/app:${{ env.RELEASE_VERSION }}
         
       - name: Tag image
         run: docker tag ghcr.io/${GITHUB_REPOSITORY}/${GITHUB_REF##*/} ghcr.io/rob-luke/fnirs-apps-glm-pipeline/app
