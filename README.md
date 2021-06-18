@@ -2,7 +2,7 @@
 
 [![build](https://github.com/rob-luke/fnirs-apps-glm-pipeline/actions/workflows/ghregistry.yml/badge.svg)](https://github.com/rob-luke/fnirs-apps-glm-pipeline/actions/workflows/ghregistry.yml)
 
-Portable fNIRS neuroimaging pipelines that work with BIDS datasets. See http://fnirs-apps.org
+http://fnirs-apps.org : Portable fNIRS neuroimaging pipelines that work with BIDS datasets.
 
 This app runs a GLM pipeline on your data.
 The pipeline converts the data to optical density and then applies the Beer Lambert Law conversion.
@@ -10,7 +10,9 @@ The data is resampled to 0.6 Hz.
 A GLM is applied (TODO: expose more parameters here) using the duration of the stimulus convolved with a glover HRF.
 If `--short_regression` is specified the short channels will be added as regressors to the design matrix for the GLM computation.
 Drift components will be added to the design matrix using a cosine model including frequencies up to 0.01 Hz (TODO: make user specified parameter).
-The results of the GLM will be export as a tidy csv file per run.
+
+The results of the GLM will be exported per subject as a tidy csv file per run.
+A summary is generated of the group level results by running a mixed effects model on the data and exported as a text file.
 
 ## Usage
 
@@ -29,7 +31,7 @@ You can modify the behaviour of the script using the options below.
 | export_drifts     | optional | False   | Export the drift coefficents in csv.                |
 | export_shorts     | optional | False   | Export the short channel coefficents in csv.        |
 | participant_label | optional | []      | Participants to process. Default is to process all. |
-| task_label.       | optional | []      | Tasks to process. Default is to process all.        |
+| task_label        | optional | []      | Tasks to process. Default is to process all.        |
 
 
 For example
