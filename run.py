@@ -17,7 +17,7 @@ from mne_nirs.statistics import statsmodels_to_results, glm_region_of_interest
 import os
 import subprocess
 
-__version__ = "v0.0.1"
+__version__ = "v0.0.4"
 
 def run(command, env={}):
     merged_env = os.environ
