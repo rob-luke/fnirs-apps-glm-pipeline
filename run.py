@@ -14,9 +14,25 @@ from mne_nirs.utils._io import glm_to_tidy
 from mne.utils import warn
 import statsmodels.formula.api as smf
 from mne_nirs.statistics import statsmodels_to_results, glm_region_of_interest
+import os
+import subprocess
 
 __version__ = "v0.0.1"
 
+def run(command, env={}):
+    merged_env = os.environ
+    merged_env.update(env)
+    process = subprocess.Popen(command, stdout=subprocess.PIPE,
+                               stderr=subprocess.STDOUT, shell=True,
+                               env=merged_env)
+    while True:
+        line = process.stdout.readline()
+        line = str(line, 'utf-8')[:-1]
+        print(line)
+        if line == '' and process.poll() != None:
+            break
+    if process.returncode != 0:
+        raise Exception("Non zero return code: %d" % process.returncode)
 
 parser = argparse.ArgumentParser(description='Quality Reports')
 parser.add_argument('--bids_dir', default="/bids_dataset", type=str,
