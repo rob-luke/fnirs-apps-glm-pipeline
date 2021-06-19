@@ -171,24 +171,25 @@ for id in ids:
             df_roi = df_roi.append(roi)
         except FileNotFoundError:
             print(f"Unable to process {b_path.fpath}")
+          
+          
+if len(ids) > 2:
+  
+  print("Computing group level channel results")
+  df_cha = df_cha.query("Chroma in ['hbo']")
+  ch_model = smf.mixedlm("theta ~ -1 + ch_name:Chroma:Condition",
+                         df_cha, groups=df_cha["ID"]).fit(method='nm')
+  ch_model_df = statsmodels_to_results(ch_model)
+  group_path = '/bids_dataset/derivatives/fnirs-apps-glm-pipeline/group.csv'
+  ch_model_df.to_csv(group_path)
 
-print("Computing group level channel results")
-df_cha = df_cha.query("Chroma in ['hbo']")
-ch_model = smf.mixedlm("theta ~ -1 + ch_name:Chroma:Condition",
-                       df_cha, groups=df_cha["ID"]).fit(method='nm')
-ch_model_df = statsmodels_to_results(ch_model)
-group_path = '/bids_dataset/derivatives/fnirs-apps-glm-pipeline/group.csv'
-ch_model_df.to_csv(group_path)
 
-
-print("Computing group level result per conditions as single ROI.")
-
-df_roi = df_roi[~df_roi.Condition.str.contains("drift")]
-df_roi = df_roi[~df_roi.Condition.str.contains("constant")]
-df_roi = df_roi[~df_roi.Condition.str.contains("short")]
-
-roi_model = smf.mixedlm("theta ~ -1 + ROI:Condition:Chroma",
-                        df_roi, groups=df_roi["ID"]).fit(method='nm')
-sys.stdout = open("/bids_dataset/derivatives/fnirs-apps-glm-pipeline/stats.txt", "w")
-print(roi_model.summary())
-sys.stdout.close()
+  print("Computing group level result per conditions as single ROI.")
+  df_roi = df_roi[~df_roi.Condition.str.contains("drift")]
+  df_roi = df_roi[~df_roi.Condition.str.contains("constant")]
+  df_roi = df_roi[~df_roi.Condition.str.contains("short")]
+  roi_model = smf.mixedlm("theta ~ -1 + ROI:Condition:Chroma",
+                          df_roi, groups=df_roi["ID"]).fit(method='nm')
+  sys.stdout = open("/bids_dataset/derivatives/fnirs-apps-glm-pipeline/stats.txt", "w")
+  print(roi_model.summary())
+  sys.stdout.close()
