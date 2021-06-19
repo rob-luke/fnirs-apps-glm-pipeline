@@ -87,7 +87,7 @@ if args.task_label:
     tasks = args.task_label
     print(f"Processing requested tasks: {tasks}")
 else:
-    all_snirfs = glob("/bids_dataset/**/*_nirs.snirf", recursive=True)
+    all_snirfs = glob(f"{args.bids_dir}/**/*_nirs.snirf", recursive=True)
     for a in all_snirfs:
         s = a.split("_task-")[1]
         s = s.split("_nirs.snirf")[0]
@@ -164,14 +164,14 @@ df_roi = pd.DataFrame()
 for id in ids:
     for task in tasks:
         b_path = BIDSPath(subject=id, task=task,
-                          root="/bids_dataset",
+                          root=f"{args.bids_dir}",
                           datatype="nirs", suffix="nirs",
                           extension=".snirf")
         try:
             raw, cha, roi = individual_analysis(b_path, id,
                                            short=args.short_regression)
-            p_out = b_path.update(root='/bids_dataset/derivatives/'
-                                       'fnirs-apps-glm-pipeline/',
+            p_out = b_path.update(root=f"{args.bids_dir}/derivatives/"
+                                       f"fnirs-apps-glm-pipeline/",
                                        extension='.csv',
                                        suffix='glm',
                                        check=False)
@@ -196,7 +196,7 @@ if len(ids) > 2:
   ch_model = smf.mixedlm("theta ~ -1 + ch_name:Chroma:Condition",
                          df_cha, groups=df_cha["ID"]).fit(method='nm')
   ch_model_df = statsmodels_to_results(ch_model)
-  group_path = '/bids_dataset/derivatives/fnirs-apps-glm-pipeline/group.csv'
+  group_path = f"{args.bids_dir}/derivatives/fnirs-apps-glm-pipeline/group.csv"
   ch_model_df.to_csv(group_path)
 
 
@@ -206,6 +206,6 @@ if len(ids) > 2:
   df_roi = df_roi[~df_roi.Condition.str.contains("short")]
   roi_model = smf.mixedlm("theta ~ -1 + ROI:Condition:Chroma",
                           df_roi, groups=df_roi["ID"]).fit(method='nm')
-  sys.stdout = open("/bids_dataset/derivatives/fnirs-apps-glm-pipeline/stats.txt", "w")
+  sys.stdout = open(f"{args.bids_dir}/derivatives/fnirs-apps-glm-pipeline/stats.txt", "w")
   print(roi_model.summary())
   sys.stdout.close()
