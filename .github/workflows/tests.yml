@@ -36,3 +36,18 @@ jobs:
         with:
           name: Formatted_BIDS_Dataset
           path: /home/runner/example_data/BIDS-NIRS-Tapping-master/derivatives
+
+      - name: Build docker image
+        run: docker build --progress=plain -t test .
+          
+      - name: Run with no arguments
+        run: docker run -v /home/runner/example_data/BIDS-NIRS-Tapping-master/:/bids_dataset test
+        
+      - name: Run with threshold argument
+        run: docker run -v /home/runner/example_data/BIDS-NIRS-Tapping-master/:/bids_dataset test --short_regression False
+        
+      - name: Run with threshold argument
+        run: docker run -v /home/runner/example_data/BIDS-NIRS-Tapping-master/:/bids_dataset test --participant_label 02
+        
+      - name: Run with threshold argument
+        run: docker run -v /home/runner/example_data/BIDS-NIRS-Tapping-master/:/bids_dataset test --participant_label 02 --export_drifts True --export_shorts True
