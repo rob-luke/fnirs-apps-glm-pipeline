@@ -2,20 +2,31 @@
 
 [![build](https://github.com/rob-luke/fnirs-apps-glm-pipeline/actions/workflows/ghregistry.yml/badge.svg)](https://github.com/rob-luke/fnirs-apps-glm-pipeline/actions/workflows/ghregistry.yml)
 
-http://fnirs-apps.org : Portable fNIRS neuroimaging pipelines that work with BIDS datasets.
+This [*fNIRS App*](http://fnirs-apps.org) will runs a GLM pipeline on your data and export channel level results per participant and a group level summary.
 
-This app runs a GLM pipeline on your data. see details of the pipeline below.
-
+**Feedback is welcome!!** Please let me know your experience with this app by raising an issue. 
 
 ## Usage
+
+To run the app you must have [docker installed](https://docs.docker.com/get-docker/). See here for details about [installing fNIRS Apps](http://fnirs-apps.org/details/). You do NOT need to have MATLAB or python installed, and you do not need any scripts.
+
+To run the app you must inform it where the `bids_dataset` to be formatted resides.
+This is done by passing the app the location of the dataset using the `-v` command.
+To run this app use the command:
 
 ```bash
 docker run -v /path/to/data/:/bids_dataset ghcr.io/rob-luke/fnirs-apps-glm-pipeline/app
 ```
 
 By default the app will process all subject and tasks.
-You can modify the behaviour of the script using the options below.
+You can also specify additional parameters by passing arguments to the app. A complete list of arguments is provided below.
+A more complete example that only runs on participant 3 and also specifies that short channel regression should not be used, can be run as:
 
+```bash
+docker run -v /path/to/data/:/bids_dataset ghcr.io/rob-luke/fnirs-apps-glm-pipeline/app \
+    --participant_label 03 \
+    --short_regression False
+```
 
 ## Pipeline details
 
@@ -23,13 +34,14 @@ You can modify the behaviour of the script using the options below.
 2. Then applies the Beer Lambert Law conversion.
 4. The data is resampled
     - to 0.6 Hz. (TODO: make optional variable)
-6. A GLM is applied  using the duration of the stimulus convolved with a glover HRF.
+6. A GLM is applied
+    - The model used is a glover HRF convolved with boxcar of stimulus duration
     - (TODO: expose more parameters here)
-    - If `--short_regression` is specified the short channels will be added as regressors to the design matrix for the GLM computation.
+    - If `--short_regression True` is specified the short channels will be added as regressors to the design matrix for the GLM computation.
     - Drift components will be added to the design matrix using a cosine model including frequencies up to 0.01 Hz (TODO: make user specified parameter).
 7. The results of the GLM will be exported per subject as a tidy csv file per run.
 8. A mixed effects model is then run on the individual data to produce a summary result
-    - First, for each subject the channels are combined to a sinle region of interest
+    - First, for each subject the channels are combined to a single region of interest
     - The model is then applied that includes condition and chromaphore as a factor with id as a random variable
     - A summary is exported as a text file
 
