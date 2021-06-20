@@ -4,7 +4,7 @@
     "author": "Robert Luke",
     "tool-version": "v0.1.0",
     "schema-version": "0.5",
-    "command-line": "fnirsapp_glm [InputDataset] [OutputLocation] [SubjectLabel] [TaskLabel] [ShortRegression] [ExportDrifts] [ExportShorts] > [OUTPUT_DIR]",
+    "command-line": "/run.py [InputDataset] [OutputLocation] [SubjectLabel] [TaskLabel] [ShortRegression] [ExportDrifts] [ExportShorts] > [OUTPUT_DIR]",
     "container-image": {
         "image": "ghcr.io/rob-luke/fnirs-apps-glm-pipeline/app",
         "index": "ghcr.io",
