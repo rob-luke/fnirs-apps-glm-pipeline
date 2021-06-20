@@ -4,11 +4,12 @@
     "author": "Robert Luke",
     "tool-version": "v0.1.0",
     "schema-version": "0.5",
-    "command-line": "fnirsapp_glm [InputDataset] [OutputLocation] [SubjectLabel] [TaskLabel] [ShortRegression] [ExportDrifts] [ExportShorts] > [OUTPUT_DIR]",
+    "command-line": "/run.py [InputDataset] [OutputLocation] [SubjectLabel] [TaskLabel] [ShortRegression] [ExportDrifts] [ExportShorts]",
     "container-image": {
-        "image": "rob-luke/fnirs-apps-glm-pipeline",
+        "image": "ghcr.io/rob-luke/fnirs-apps-glm-pipeline/app",
         "index": "ghcr.io",
-        "type": "docker"
+        "type": "docker",
+        "entrypoint": true
     },
     "inputs": [
         {
@@ -37,7 +38,7 @@
             "optional": true,
             "type": "String",
             "list": true,
-            "value-key": "SubjectLabel"
+            "value-key": "[SubjectLabel]"
         },
         {
             "command-line-flag": "--task-label",
@@ -47,7 +48,7 @@
             "optional": true,
             "type": "String",
             "list": true,
-            "value-key": "TaskLabel"
+            "value-key": "[TaskLabel]"
         },
         {
             "command-line-flag": "--short-regression",
@@ -91,7 +92,7 @@
             "id": "output_directory",
             "name": "BIDS derivatives directory",
             "optional": false,
-            "path-template": "OUTPUT_DIR"
+            "path-template": "[OutputLocation]"
         }
     ],
     "suggested-resources": {
@@ -113,5 +114,8 @@
             "description": "Crashed"
         }
     ],
-    "doi": "10.5281/zenodo.4997626"
+    "custom": {
+        "BIDSAppSpecVersion": "Draft"
+    },
+    "doi": "10.5281/zenodo.4998538"
 }

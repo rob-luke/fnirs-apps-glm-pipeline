@@ -1,12 +1,9 @@
 {
-    "input_datasets": "/home/runner/example_data/BIDS-NIRS-Tapping-master",
-    "output_location": "/home/runner/example_data/BIDS-NIRS-Tapping-master/derivatives/fnirs-app-glm-pipeline",
+    "input_datasets": "/home/runner/work/fnirs-apps-glm-pipeline/fnirs-apps-glm-pipeline/example_data/BIDS-NIRS-Tapping-master",
+    "output_location": "/home/runner/work/fnirs-apps-glm-pipeline/fnirs-apps-glm-pipeline/example_data/BIDS-NIRS-Tapping-master/derivatives/fnirs-app-glm-pipeline",
     "subject_label": [
         "01",
-        "02",
-        "03",
-        "04",
-        "05"
+        "02"
     ],
     "task_label": [
         "tapping"
