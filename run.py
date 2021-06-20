@@ -11,7 +11,6 @@ from mne_nirs.statistics import run_GLM
 from mne_nirs.experimental_design import make_first_level_design_matrix
 from mne_nirs.channels import get_short_channels, get_long_channels
 from mne_nirs.utils._io import glm_to_tidy
-from mne.utils import warn
 import statsmodels.formula.api as smf
 from mne_nirs.statistics import statsmodels_to_results, glm_region_of_interest
 import os
