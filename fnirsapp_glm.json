@@ -92,7 +92,7 @@
             "id": "output_directory",
             "name": "BIDS derivatives directory",
             "optional": false,
-            "path-template": "OUTPUT_DIR"
+            "path-template": "[OUTPUT_DIR]"
         }
     ],
     "suggested-resources": {

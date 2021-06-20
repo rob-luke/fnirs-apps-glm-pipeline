@@ -21,5 +21,5 @@ jobs:
           ls
       - run:  |
           cd /
-          bosh exec launch fnirsapp_glm.json example_invocation.json --debug
+          bosh exec launch /home/runner/work/fnirs-apps-glm-pipeline/fnirs-apps-glm-pipeline/fnirsapp_glm.json /home/runner/work/fnirs-apps-glm-pipeline/fnirs-apps-glm-pipeline/example_invocation.json --debug
         name: Run bosh
