@@ -45,8 +45,12 @@ jobs:
         run: |
           pwd
           ls
+          ls example_data
+          ls example_data/BIDS-NIRS-Tapping-master
+          ls example_data/BIDS-NIRS-Tapping-master/derivatives
+          ls example_data/BIDS-NIRS-Tapping-master/derivatives/fnirs-app-glm-pipeline
 
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v2
         with:
           name: Bosh output
           path: /home/runner/work/fnirs-apps-glm-pipeline/fnirs-apps-glm-pipeline/*.boshjob.sh
