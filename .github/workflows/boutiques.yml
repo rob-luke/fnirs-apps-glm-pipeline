@@ -19,5 +19,7 @@ jobs:
         run: |
           pwd
           ls
-      - run: bosh exec launch fnirsapp_glm.json example_invocation.json --debug
+      - run:  |
+          cd /
+          bosh exec launch fnirsapp_glm.json example_invocation.json --debug
         name: Run bosh
