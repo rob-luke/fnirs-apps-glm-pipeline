@@ -37,7 +37,7 @@
             "name": "subject-label",
             "optional": true,
             "type": "String",
-            "list": true,
+            "list": false,
             "value-key": "SubjectLabel"
         },
         {
