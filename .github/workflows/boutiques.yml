@@ -39,7 +39,7 @@ jobs:
 
       - name: Run bosh
         run: |
-          bosh exec launch fnirsapp_glm.json example_invocation.json --debug > bosh.log
+          bosh exec launch fnirsapp_glm.json example_invocation.json --debug
 
       - name: Where are we and whats around
         run: |
@@ -55,4 +55,6 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: Bosh output
-          path: /home/runner/work/fnirs-apps-glm-pipeline/fnirs-apps-glm-pipeline/*bosh*
+          path: |
+            /home/runner/work/fnirs-apps-glm-pipeline/fnirs-apps-glm-pipeline/*bosh*
+            example_data/BIDS-NIRS-Tapping-master/derivatives/fnirs-app-glm-pipeline/sub-01/nirs/*
