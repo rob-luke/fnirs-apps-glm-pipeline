@@ -17,7 +17,7 @@ from mne_nirs.statistics import statsmodels_to_results, glm_region_of_interest
 import os
 import subprocess
 
-__version__ = "v0.0.4"
+__version__ = "v0.0.5"
 
 def run(command, env={}):
     merged_env = os.environ
@@ -38,6 +38,9 @@ parser = argparse.ArgumentParser(description='Quality Reports')
 parser.add_argument('--bids_dir', default="/bids_dataset", type=str,
                     help='The directory with the input dataset '
                     'formatted according to the BIDS standard.')
+parser.add_argument('--output_dir', default="/bids_dataset/derivatives/fnirs-apps-glm-pipeline", type=str,
+                    help='The directory where the output files '
+                    'should be stored. ')
 parser.add_argument('--short_regression', type=bool, default=True,
                     help='Include short channels as regressors.')
 parser.add_argument('--export_drifts', type=bool, default=False,
@@ -170,8 +173,7 @@ for id in ids:
         try:
             raw, cha, roi = individual_analysis(b_path, id,
                                            short=args.short_regression)
-            p_out = b_path.update(root=f"{args.bids_dir}/derivatives/"
-                                       f"fnirs-apps-glm-pipeline/",
+            p_out = b_path.update(root=f"{args.output_dir}",
                                        extension='.csv',
                                        suffix='glm',
                                        check=False)
@@ -196,7 +198,7 @@ if len(ids) > 2:
   ch_model = smf.mixedlm("theta ~ -1 + ch_name:Chroma:Condition",
                          df_cha, groups=df_cha["ID"]).fit(method='nm')
   ch_model_df = statsmodels_to_results(ch_model)
-  group_path = f"{args.bids_dir}/derivatives/fnirs-apps-glm-pipeline/group.csv"
+  group_path = f"{args.output_dir}/group.csv"
   ch_model_df.to_csv(group_path)
 
 
@@ -206,6 +208,6 @@ if len(ids) > 2:
   df_roi = df_roi[~df_roi.Condition.str.contains("short")]
   roi_model = smf.mixedlm("theta ~ -1 + ROI:Condition:Chroma",
                           df_roi, groups=df_roi["ID"]).fit(method='nm')
-  sys.stdout = open(f"{args.bids_dir}/derivatives/fnirs-apps-glm-pipeline/stats.txt", "w")
+  sys.stdout = open(f"{args.output_dir}/stats.txt", "w")
   print(roi_model.summary())
   sys.stdout.close()
