@@ -87,6 +87,14 @@
             "value-key": "[ExportShorts]"
         }
     ],
+    "output-files": [
+        {
+            "id": "output_directory",
+            "name": "BIDS derivatives directory",
+            "optional": false,
+            "path-template": "[OutputLocation]"
+        }
+    ],
     "suggested-resources": {
         "cpu-cores": 1,
         "ram": 1,
