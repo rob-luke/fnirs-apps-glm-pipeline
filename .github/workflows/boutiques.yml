@@ -45,3 +45,8 @@ jobs:
         run: |
           pwd
           ls
+
+      - uses: actions/upload-artifact@v1
+        with:
+          name: Bosh output
+          path: /home/runner/work/fnirs-apps-glm-pipeline/fnirs-apps-glm-pipeline/*.boshjob.sh
