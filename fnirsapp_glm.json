@@ -4,7 +4,7 @@
     "author": "Robert Luke",
     "tool-version": "v0.1.0",
     "schema-version": "0.5",
-    "command-line": "mkdir - [OUTPUT_DIR]; /run.py [InputDataset] [OutputLocation] [SubjectLabel] [TaskLabel] [ShortRegression] [ExportDrifts] [ExportShorts]",
+    "command-line": "/run.py [InputDataset] [OutputLocation] [SubjectLabel] [TaskLabel] [ShortRegression] [ExportDrifts] [ExportShorts]",
     "container-image": {
         "image": "ghcr.io/rob-luke/fnirs-apps-glm-pipeline/app",
         "index": "ghcr.io",
@@ -87,14 +87,6 @@
             "value-key": "[ExportShorts]"
         }
     ],
-    "output-files": [
-        {
-            "id": "output_directory",
-            "name": "BIDS derivatives directory",
-            "optional": false,
-            "path-template": "[OUTPUT_DIR]"
-        }
-    ],
     "suggested-resources": {
         "cpu-cores": 1,
         "ram": 1,
@@ -114,5 +106,8 @@
             "description": "Crashed"
         }
     ],
+    "custom": {
+        "BIDSAppSpecVersion": "Draft"
+    },
     "doi": "10.5281/zenodo.4997626"
 }
