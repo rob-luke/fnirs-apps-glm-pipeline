@@ -1,8 +1,16 @@
 {
     "input_datasets": "/home/runner/example_data/BIDS-NIRS-Tapping-master",
     "output_location": "/home/runner/example_data/BIDS-NIRS-Tapping-master/derivatives/fnirs-app-glm-pipeline",
-    "subject_label": "01",
-    "task_label": "tapping",
+    "subject_label": [
+        "01",
+        "02",
+        "03",
+        "04",
+        "05"
+    ],
+    "task_label": [
+        "tapping"
+    ],
     "short_regression": "True",
     "export_drifts": "False",
     "export_shorts": "False"

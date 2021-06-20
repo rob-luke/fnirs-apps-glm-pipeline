@@ -37,8 +37,8 @@
             "name": "subject-label",
             "optional": true,
             "type": "String",
-            "list": false,
-            "value-key": "SubjectLabel"
+            "list": true,
+            "value-key": "[SubjectLabel]"
         },
         {
             "command-line-flag": "--task-label",
@@ -48,7 +48,7 @@
             "optional": true,
             "type": "String",
             "list": true,
-            "value-key": "TaskLabel"
+            "value-key": "[TaskLabel]"
         },
         {
             "command-line-flag": "--short-regression",
