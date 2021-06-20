@@ -24,8 +24,8 @@ A more complete example that only runs on participant 3 and also specifies that 
 
 ```bash
 docker run -v /path/to/data/:/bids_dataset ghcr.io/rob-luke/fnirs-apps-glm-pipeline/app \
-    --participant_label 03 \
-    --short_regression False
+    --subject-label 03 \
+    --short-regression False
 ```
 
 ## Pipeline details
@@ -37,7 +37,7 @@ docker run -v /path/to/data/:/bids_dataset ghcr.io/rob-luke/fnirs-apps-glm-pipel
 6. A GLM is applied
     - The model used is a glover HRF convolved with boxcar of stimulus duration
     - (TODO: expose more parameters here)
-    - If `--short_regression True` is specified the short channels will be added as regressors to the design matrix for the GLM computation.
+    - If `--short-regression True` is specified the short channels will be added as regressors to the design matrix for the GLM computation.
     - Drift components will be added to the design matrix using a cosine model including frequencies up to 0.01 Hz (TODO: make user specified parameter).
 7. The results of the GLM will be exported per subject as a tidy csv file per run.
 8. A mixed effects model is then run on the individual data to produce a summary result
@@ -50,17 +50,17 @@ docker run -v /path/to/data/:/bids_dataset ghcr.io/rob-luke/fnirs-apps-glm-pipel
 
 |                   | Required | Default | Note                                                |
 |-------------------|----------|---------|-----------------------------------------------------|
-| short_regression  | optional | True    | Include short channels as regressor.                |
-| export_drifts     | optional | False   | Export the drift coefficents in csv.                |
-| export_shorts     | optional | False   | Export the short channel coefficents in csv.        |
-| participant_label | optional | []      | Participants to process. Default is to process all. |
-| task_label        | optional | []      | Tasks to process. Default is to process all.        |
+| short-regression  | optional | True    | Include short channels as regressor.                |
+| export-drifts     | optional | False   | Export the drift coefficients in csv.               |
+| export-shorts     | optional | False   | Export the short channel coefficients in csv.       |
+| subject-label     | optional | []      | Participants to process. Default is to process all. |
+| task-label        | optional | []      | Tasks to process. Default is to process all.        |
 
 
 For example
 
 ```bash
-docker run -v /path/to/data/:/bids_dataset ghcr.io/rob-luke/fnirs-apps-glm-pipeline/app --short_regression=True --export_shorts=True
+docker run -v /path/to/data/:/bids_dataset ghcr.io/rob-luke/fnirs-apps-glm-pipeline/app --short-regression=True --export-shorts=True --subject-label 02 04
 ```
 
 ## Updating
@@ -81,7 +81,13 @@ docker run -v /path/:/bids_dataset ghcr.io/rob-luke/fnirs-apps-glm-pipeline/app:
 Acknowledgements
 ----------------
 
-This package uses MNE-Python, MNE-BIDS, and MNE-NIRS under the hood. Please cite those package accordingly.
+This app is directly based on BIDS Apps and BIDS Execution. Please cite those projects when using this app.
+
+BIDS Apps: https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1005209
+
+BIDS Execution: https://github.com/bids-standard/bids-specification/issues/313
+
+This app uses MNE-Python, MNE-BIDS, and MNE-NIRS under the hood. Please cite those package accordingly.
 
 MNE-Python: https://mne.tools/dev/overview/cite.html
 

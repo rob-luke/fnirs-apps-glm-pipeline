@@ -11,15 +11,14 @@ from mne_nirs.statistics import run_GLM
 from mne_nirs.experimental_design import make_first_level_design_matrix
 from mne_nirs.channels import get_short_channels, get_long_channels
 from mne_nirs.utils._io import glm_to_tidy
-from mne.utils import warn
 import statsmodels.formula.api as smf
 from mne_nirs.statistics import statsmodels_to_results, glm_region_of_interest
 import os
 import subprocess
 
-__version__ = "v0.0.5"
+__version__ = "v0.1.0"
 
-def run(command, env={}):
+def fnirsapp_glm(command, env={}):
     merged_env = os.environ
     merged_env.update(env)
     process = subprocess.Popen(command, stdout=subprocess.PIPE,
@@ -35,32 +34,30 @@ def run(command, env={}):
         raise Exception("Non zero return code: %d" % process.returncode)
 
 parser = argparse.ArgumentParser(description='Quality Reports')
-parser.add_argument('--bids_dir', default="/bids_dataset", type=str,
-                    help='The directory with the input dataset '
-                    'formatted according to the BIDS standard.')
-parser.add_argument('--output_dir', default="/bids_dataset/derivatives/fnirs-apps-glm-pipeline", type=str,
-                    help='The directory where the output files '
-                    'should be stored. ')
-parser.add_argument('--short_regression', type=bool, default=True,
-                    help='Include short channels as regressors.')
-parser.add_argument('--export_drifts', type=bool, default=False,
-                    help='Export the drift coefficents in csv.')
-parser.add_argument('--export_shorts', type=bool, default=False,
-                    help='Export the short channel coefficents in csv.')
-parser.add_argument('--participant_label',
+parser.add_argument('--input-datasets', default="/bids_dataset", type=str,
+                    help='The directory with the input dataset formatted according to the BIDS standard.')
+parser.add_argument('--output-location', default="/bids_dataset/derivatives/fnirs-apps-glm-pipeline",
+                    type=str, help='The directory where the output files should be stored.')
+parser.add_argument('--subject-label',
                     help='The label(s) of the participant(s) that should be '
                     'analyzed. The label corresponds to '
-                    'sub-<participant_label> from the BIDS spec (so it does '
+                    'sub-<subject-label> from the BIDS spec (so it does '
                     'not include "sub-"). If this parameter is not provided '
                     'all subjects should be analyzed. Multiple participants '
                     'can be specified with a space separated list.',
                     nargs="+")
-parser.add_argument('--task_label',
+parser.add_argument('--task-label',
                     help='The label(s) of the tasks(s) that should be '
                     'analyzed. If this parameter is not provided '
                     'all tasks should be analyzed. Multiple tasks '
                     'can be specified with a space separated list.',
                     nargs="+")
+parser.add_argument('--short-regression', type=bool, default=True,
+                    help='Include short channels as regressors.')
+parser.add_argument('--export-drifts', type=bool, default=False,
+                    help='Export the drift coefficients in csv.')
+parser.add_argument('--export-shorts', type=bool, default=False,
+                    help='Export the short channel coefficients in csv.')
 parser.add_argument('-v', '--version', action='version',
                     version='BIDS-App Scalp Coupling Index version '
                     f'{__version__}')
@@ -74,12 +71,12 @@ args = parser.parse_args()
 
 ids = []
 # only for a subset of subjects
-if args.participant_label:
-    ids = args.participant_label
+if args.subject_label:
+    ids = args.subject_label
     print(f"Processing requested participants: {ids}")
 # for all subjects
 else:
-    subject_dirs = glob(op.join(args.bids_dir, "sub-*"))
+    subject_dirs = glob(op.join(args.input_datasets, "sub-*"))
     ids = [subject_dir.split("-")[-1] for
            subject_dir in subject_dirs]
     print(f"No participants specified, processing: {ids}")
@@ -90,7 +87,7 @@ if args.task_label:
     tasks = args.task_label
     print(f"Processing requested tasks: {tasks}")
 else:
-    all_snirfs = glob(f"{args.bids_dir}/**/*_nirs.snirf", recursive=True)
+    all_snirfs = glob(f"{args.input_datasets}/**/*_nirs.snirf", recursive=True)
     for a in all_snirfs:
         s = a.split("_task-")[1]
         s = s.split("_nirs.snirf")[0]
@@ -167,13 +164,13 @@ df_roi = pd.DataFrame()
 for id in ids:
     for task in tasks:
         b_path = BIDSPath(subject=id, task=task,
-                          root=f"{args.bids_dir}",
+                          root=f"{args.input_datasets}",
                           datatype="nirs", suffix="nirs",
                           extension=".snirf")
         try:
             raw, cha, roi = individual_analysis(b_path, id,
                                            short=args.short_regression)
-            p_out = b_path.update(root=f"{args.output_dir}",
+            p_out = b_path.update(root=f"{args.output_location}",
                                        extension='.csv',
                                        suffix='glm',
                                        check=False)
@@ -199,7 +196,7 @@ if len(ids) > 2:
   ch_model = smf.mixedlm("theta ~ -1 + ch_name:Chroma:Condition",
                          df_cha, groups=df_cha["ID"]).fit(method='nm')
   ch_model_df = statsmodels_to_results(ch_model)
-  group_path = f"{args.output_dir}/group.csv"
+  group_path = f"{args.output_location}/group.csv"
   ch_model_df.to_csv(group_path)
 
 
@@ -209,6 +206,6 @@ if len(ids) > 2:
   df_roi = df_roi[~df_roi.Condition.str.contains("short")]
   roi_model = smf.mixedlm("theta ~ -1 + ROI:Condition:Chroma",
                           df_roi, groups=df_roi["ID"]).fit(method='nm')
-  sys.stdout = open(f"{args.output_dir}/stats.txt", "w")
+  sys.stdout = open(f"{args.output_location}/stats.txt", "w")
   print(roi_model.summary())
   sys.stdout.close()

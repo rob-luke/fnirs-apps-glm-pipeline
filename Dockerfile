@@ -15,6 +15,7 @@ RUN pip install mne-nirs
 RUN pip install h5py
 RUN pip install statsmodels
 
-COPY run.py /run.py
+COPY fnirsapp_glm.py /run.py
+RUN chmod +x /run.py
 
 ENTRYPOINT ["/run.py"]
