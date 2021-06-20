@@ -1,8 +1,6 @@
 # fNIRS App: GLM Pipeline
 
 [![build](https://github.com/rob-luke/fnirs-apps-glm-pipeline/actions/workflows/ghregistry.yml/badge.svg)](https://github.com/rob-luke/fnirs-apps-glm-pipeline/actions/workflows/ghregistry.yml)
-
-
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4998538.svg)](https://doi.org/10.5281/zenodo.4998538)
 
 
