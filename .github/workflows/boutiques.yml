@@ -15,11 +15,19 @@ jobs:
         with:
           packages: |
             boutiques
+      - name: Download test data
+        shell: bash -el {0}
+        run: |
+          curl -L https://github.com/rob-luke/BIDS-NIRS-Tapping/archive/master.zip --output data.zip
+          pwd
+          unzip data.zip -d ./example_data
+          ls
+
       - name: Where are we and whats around
         run: |
           pwd
           ls
+
       - run:  |
-          cd /
-          bosh exec launch /home/runner/work/fnirs-apps-glm-pipeline/fnirs-apps-glm-pipeline/fnirsapp_glm.json /home/runner/work/fnirs-apps-glm-pipeline/fnirs-apps-glm-pipeline/example_invocation.json --debug
+          bosh exec launch fnirsapp_glm.json example_invocation.json --debug
         name: Run bosh
