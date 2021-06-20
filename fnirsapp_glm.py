@@ -18,7 +18,7 @@ import subprocess
 
 __version__ = "v0.1.0"
 
-def run(command, env={}):
+def fnirsapp_glm(command, env={}):
     merged_env = os.environ
     merged_env.update(env)
     process = subprocess.Popen(command, stdout=subprocess.PIPE,
