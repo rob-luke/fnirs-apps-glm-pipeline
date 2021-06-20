@@ -55,7 +55,7 @@ docker run -v /path/to/data/:/bids_dataset ghcr.io/rob-luke/fnirs-apps-glm-pipel
 | short-regression  | optional | True    | Include short channels as regressor.                |
 | export-drifts     | optional | False   | Export the drift coefficients in csv.               |
 | export-shorts     | optional | False   | Export the short channel coefficients in csv.       |
-| subject-label     | optional | []      | Participants to process. Default is to process all. |
+| subject-label     | optional | []      | Sujects to process. Default is to process all.      |
 | task-label        | optional | []      | Tasks to process. Default is to process all.        |
 
 
