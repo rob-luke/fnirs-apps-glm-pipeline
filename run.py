@@ -184,6 +184,7 @@ for id in ids:
                 cha = cha[~cha.Condition.str.contains("constant")]
             if args.export_shorts is False:
                 cha = cha[~cha.Condition.str.contains("short")]
+            print(f"Writing subject results to: {p_out.fpath}")
             cha.to_csv(p_out.fpath, index=False)
             df_cha = df_cha.append(cha)
             df_roi = df_roi.append(roi)
