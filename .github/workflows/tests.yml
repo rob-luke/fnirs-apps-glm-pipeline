@@ -51,3 +51,6 @@ jobs:
         
       - name: Run with threshold argument
         run: docker run -v /home/runner/example_data/BIDS-NIRS-Tapping-master/:/bids_dataset test --participant_label 02 --export_drifts True --export_shorts True
+        
+      - name: Run with threshold argument
+        run: docker run -v /home/runner/example_data/BIDS-NIRS-Tapping-master/:/bids_dataset test --participant_label 02 --output_dir /bids_dataset/derivatives/custom
