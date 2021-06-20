@@ -4,7 +4,7 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4998538.svg)](https://doi.org/10.5281/zenodo.4998538)
 
 
-This [*fNIRS App*](http://fnirs-apps.org) will runs a GLM pipeline on your data and export channel level results per participant and a group level summary.
+This [*fNIRS App*](http://fnirs-apps.org) will runs a GLM pipeline on your data and export subject and group level results.
 
 **Feedback is welcome!!** Please let me know your experience with this app by raising an issue. 
 
