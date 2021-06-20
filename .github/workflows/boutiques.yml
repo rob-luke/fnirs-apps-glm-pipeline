@@ -1,0 +1,23 @@
+name: "Tests - Boutique"
+on:
+- pull_request
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v1
+      - uses: BSFishy/pip-action@v1
+        with:
+          packages: |
+            boutiques
+      - name: Where are we and whats around
+        run: |
+          pwd
+          ls
+      - run: bosh exec launch fnirsapp_glm.json example_invocation.json --debug
+        name: Run bosh
