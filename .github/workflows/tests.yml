@@ -42,15 +42,18 @@ jobs:
           
       - name: Run with no arguments
         run: docker run -v /home/runner/example_data/BIDS-NIRS-Tapping-master/:/bids_dataset test
+
+      - name: Run with manual specification of input directory (should find nothing)
+        run: docker run -v /home/runner/example_data/BIDS-NIRS-Tapping-master/:/bids_dataset test --input-datasets /bids_dataset2
         
-      - name: Run with threshold argument
-        run: docker run -v /home/runner/example_data/BIDS-NIRS-Tapping-master/:/bids_dataset test --short_regression False
+      - name: Run with manual specification of short channels and participants
+        run: docker run -v /home/runner/example_data/BIDS-NIRS-Tapping-master/:/bids_dataset test --short-regression False  --subject-label 02 04
+
+      - name: Run with manual specification of participant
+        run: docker run -v /home/runner/example_data/BIDS-NIRS-Tapping-master/:/bids_dataset test --subject-label 02
         
-      - name: Run with threshold argument
-        run: docker run -v /home/runner/example_data/BIDS-NIRS-Tapping-master/:/bids_dataset test --participant_label 02
+      - name: Run with manual specification of exports and subject
+        run: docker run -v /home/runner/example_data/BIDS-NIRS-Tapping-master/:/bids_dataset test --subject-label 02 --export-drifts True --export-shorts True
         
-      - name: Run with threshold argument
-        run: docker run -v /home/runner/example_data/BIDS-NIRS-Tapping-master/:/bids_dataset test --participant_label 02 --export_drifts True --export_shorts True
-        
-      - name: Run with threshold argument
-        run: docker run -v /home/runner/example_data/BIDS-NIRS-Tapping-master/:/bids_dataset test --participant_label 02 --output_dir /bids_dataset/derivatives/custom
+      - name: Run with manual specification of
+        run: docker run -v /home/runner/example_data/BIDS-NIRS-Tapping-master/:/bids_dataset test --subject-label 02 --output-location /bids_dataset/derivatives/custom
