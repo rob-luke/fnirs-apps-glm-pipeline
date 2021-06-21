@@ -10,10 +10,10 @@ This [*fNIRS App*](http://fnirs-apps.org) will runs a GLM pipeline on your data 
 
 ## Usage
 
-To run the app you must have [docker installed](https://docs.docker.com/get-docker/). See here for details about [installing fNIRS Apps](http://fnirs-apps.org/details/). You do NOT need to have MATLAB or python installed, and you do not need any scripts.
+To run the app you must have [docker installed](https://docs.docker.com/get-docker/). See here for details about [installing fNIRS Apps](http://fnirs-apps.org/overview//). You do NOT need to have MATLAB or python installed, and you do not need any scripts. See this [tutorial for an introduction to fNIRS Apps](http://fnirs-apps.org/tutorial/).
 
-To run the app you must inform it where the `bids_dataset` to be formatted resides.
-This is done by passing the app the location of the dataset using the `-v` command.
+To run the app you must inform the software where the `bids_dataset` resides.
+This is done by passing the location of the dataset using the `-v` command to the app.
 To run this app use the command:
 
 ```bash
@@ -62,7 +62,7 @@ docker run -v /path/to/data/:/bids_dataset ghcr.io/rob-luke/fnirs-apps-glm-pipel
 For example
 
 ```bash
-docker run -v /path/to/data/:/bids_dataset ghcr.io/rob-luke/fnirs-apps-glm-pipeline/app --short-regression=True --export-shorts=True --subject-label 02 04
+docker run -v /path/to/data/:/bids_dataset ghcr.io/rob-luke/fnirs-apps-glm-pipeline/app --short-regression True --export-shorts True --subject-label 02 04
 ```
 
 ## Updating
@@ -78,6 +78,13 @@ Or to run a specific version:
 ```bash
 docker run -v /path/:/bids_dataset ghcr.io/rob-luke/fnirs-apps-glm-pipeline/app:v1.4.2
 ```
+
+## Additional information
+
+#### Boutiques
+
+This app is [boutiques compatible](https://boutiques.github.io).
+In addition to the methods described above, this app can also be run using [boutiques bosh command](https://boutiques.github.io/doc/index.html).
 
 
 Acknowledgements
