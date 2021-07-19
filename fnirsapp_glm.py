@@ -7,16 +7,16 @@ from mne_bids import BIDSPath, read_raw_bids
 from glob import glob
 import os.path as op
 from mne.preprocessing.nirs import optical_density, beer_lambert_law
-from mne_nirs.statistics import run_GLM
+from mne_nirs.statistics import run_glm
 from mne_nirs.experimental_design import make_first_level_design_matrix
 from mne_nirs.channels import get_short_channels, get_long_channels
-from mne_nirs.utils._io import glm_to_tidy
 import statsmodels.formula.api as smf
-from mne_nirs.statistics import statsmodels_to_results, glm_region_of_interest
 import os
 import subprocess
+from mne.utils import logger
+import mne
 
-__version__ = "v0.2.0"
+__version__ = "v0.3.0"
 
 def fnirsapp_glm(command, env={}):
     merged_env = os.environ
@@ -54,6 +54,8 @@ parser.add_argument('--task-label',
                     nargs="+")
 parser.add_argument('--short-regression', type=bool, default=True,
                     help='Include short channels as regressors.')
+parser.add_argument('--sample-rate', type=float, default=0.6,
+                    help='Sample rate to resample data to (Hz).')
 parser.add_argument('--export-drifts', type=bool, default=False,
                     help='Export the drift coefficients in csv.')
 parser.add_argument('--export-shorts', type=bool, default=False,
@@ -63,6 +65,8 @@ parser.add_argument('-v', '--version', action='version',
                     f'{__version__}')
 args = parser.parse_args()
 
+mne.set_log_level("INFO")
+logger.info("\n")
 
 ########################################
 # Extract parameters
@@ -107,6 +111,7 @@ def individual_analysis(bids_path, ID, srate=0.6, short=True):
     # Convert signal to haemoglobin and resample
     raw_od = optical_density(raw_intensity)
     raw_haemo = beer_lambert_law(raw_od)
+    logger.info(f"    Resampling to {srate} Hz")
     raw_haemo.resample(srate, verbose=True)
 
     # Cut out just the short channels for creating a GLM repressor
@@ -120,7 +125,7 @@ def individual_analysis(bids_path, ID, srate=0.6, short=True):
                          "See https://github.com/rob-luke/"
                          "fnirs-apps-glm-pipeline/issues/1")
     stim_dur = raw_haemo.annotations.duration[0]
-    print(f"Fitting HRF with duration {stim_dur} seconds.")
+    logger.info(f"    Fitting HRF with duration {stim_dur} seconds.")
 
     # Create a design matrix
     design_matrix = make_first_level_design_matrix(raw_haemo,
@@ -132,26 +137,25 @@ def individual_analysis(bids_path, ID, srate=0.6, short=True):
             design_matrix[f"short{idx}"] = sht_chans.copy().get_data()[idx]
 
     # Run GLM
-    glm_est = run_GLM(raw_haemo, design_matrix)
+    glm_est = run_glm(raw_haemo, design_matrix)
 
     # Extract channel metrics
-    cha = glm_to_tidy(raw_haemo, glm_est, design_matrix)
-    cha["ID"] = ID  # Add the participant ID to the dataframe
+    channel_df = glm_est.to_dataframe()
+    channel_df["ID"] = ID  # Add the participant ID to the dataframe
 
     # Convert to uM for nicer plotting below.
-    cha["theta"] = [t * 1.e6 for t in cha["theta"]]
+    channel_df["theta"] = [t * 1.e6 for t in channel_df["theta"]]
 
     # Define channels in each region of interest
     # Then generate the correct indices for each pair
     groups = dict(AllChannels=range(len(raw_haemo.ch_names)))
     # Compute region of interest results from channel data
-    roi = pd.DataFrame()
-    for idx, col in enumerate(design_matrix.columns):
-        roi = roi.append(glm_region_of_interest(glm_est, groups, idx, col))
+    roi = glm_est.to_dataframe_region_of_interest(groups, design_matrix.columns)
+
     roi["ID"] = ID  # Add the participant ID to the dataframe
     roi["theta"] = [t * 1.e6 for t in roi["theta"]]
 
-    return raw_haemo, cha, roi
+    return raw_haemo, channel_df, roi
 
 
 ########################################
@@ -169,11 +173,11 @@ for id in ids:
                           extension=".snirf")
         try:
             raw, cha, roi = individual_analysis(b_path, id,
-                                           short=args.short_regression)
+                                                short=args.short_regression,
+                                                srate=args.sample_rate)
             p_out = b_path.update(root=f"{args.output_location}",
-                                       extension='.csv',
-                                       suffix='glm',
-                                       check=False)
+                                  extension='.csv',
+                                  suffix='glm', check=False)
             p_out.fpath.parent.mkdir(exist_ok=True, parents=True)
 
             if args.export_drifts is False:
@@ -190,15 +194,6 @@ for id in ids:
           
           
 if len(ids) > 2:
-  
-  print("Computing group level channel results")
-  df_cha = df_cha.query("Chroma in ['hbo']")
-  ch_model = smf.mixedlm("theta ~ -1 + ch_name:Chroma:Condition",
-                         df_cha, groups=df_cha["ID"]).fit(method='nm')
-  ch_model_df = statsmodels_to_results(ch_model)
-  group_path = f"{args.output_location}/group.csv"
-  ch_model_df.to_csv(group_path)
-
 
   print("Computing group level result per conditions as single ROI.")
   df_roi = df_roi[~df_roi.Condition.str.contains("drift")]
@@ -206,6 +201,7 @@ if len(ids) > 2:
   df_roi = df_roi[~df_roi.Condition.str.contains("short")]
   roi_model = smf.mixedlm("theta ~ -1 + ROI:Condition:Chroma",
                           df_roi, groups=df_roi["ID"]).fit(method='nm')
+  print(roi_model.summary())
   sys.stdout = open(f"{args.output_location}/stats.txt", "w")
   print(roi_model.summary())
   sys.stdout.close()

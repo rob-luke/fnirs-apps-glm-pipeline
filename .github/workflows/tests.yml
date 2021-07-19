@@ -57,3 +57,6 @@ jobs:
         
       - name: Run with manual specification of output-location
         run: docker run -v /home/runner/example_data/BIDS-NIRS-Tapping-master/:/bids_dataset test --subject-label 02 --output-location /bids_dataset/derivatives/custom
+
+      - name: Run with specified sample rate and exports
+        run: docker run -v /home/runner/example_data/BIDS-NIRS-Tapping-master/:/bids_dataset test --sample-rate=0.5 --export-drifts False --export-shorts False
