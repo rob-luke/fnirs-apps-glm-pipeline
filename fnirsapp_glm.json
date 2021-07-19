@@ -4,7 +4,7 @@
     "author": "Robert Luke",
     "tool-version": "v0.2.0",
     "schema-version": "0.5",
-    "command-line": "/run.py [InputDataset] [OutputLocation] [SubjectLabel] [TaskLabel] [ShortRegression] [ExportDrifts] [ExportShorts]",
+    "command-line": "/run.py [InputDataset] [OutputLocation] [SubjectLabel] [TaskLabel] [ShortRegression] [ExportDrifts] [ExportShorts] [SampleRate]",
     "container-image": {
         "image": "ghcr.io/rob-luke/fnirs-apps-glm-pipeline/app",
         "index": "ghcr.io",
@@ -85,6 +85,14 @@
                 "False"
             ],
             "value-key": "[ExportShorts]"
+        },
+        {
+            "command-line-flag": "--sample-rate",
+            "id": "sample_rate",
+            "name": "sample-rate",
+            "optional": true,
+            "type": "Number",
+            "value-key": "[SampleRate]"
         }
     ],
     "output-files": [
