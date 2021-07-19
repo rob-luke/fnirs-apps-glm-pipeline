@@ -16,7 +16,7 @@ import subprocess
 from mne.utils import logger
 import mne
 
-__version__ = "v0.2.0"
+__version__ = "v0.3.0"
 
 def fnirsapp_glm(command, env={}):
     merged_env = os.environ
@@ -201,6 +201,7 @@ if len(ids) > 2:
   df_roi = df_roi[~df_roi.Condition.str.contains("short")]
   roi_model = smf.mixedlm("theta ~ -1 + ROI:Condition:Chroma",
                           df_roi, groups=df_roi["ID"]).fit(method='nm')
+  print(roi_model.summary())
   sys.stdout = open(f"{args.output_location}/stats.txt", "w")
   print(roi_model.summary())
   sys.stdout.close()
