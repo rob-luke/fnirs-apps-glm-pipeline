@@ -55,5 +55,5 @@ jobs:
       - name: Run with manual specification of exports and subject
         run: docker run -v /home/runner/example_data/BIDS-NIRS-Tapping-master/:/bids_dataset test --subject-label 02 --export-drifts True --export-shorts True
         
-      - name: Run with manual specification of
+      - name: Run with manual specification of output-location
         run: docker run -v /home/runner/example_data/BIDS-NIRS-Tapping-master/:/bids_dataset test --subject-label 02 --output-location /bids_dataset/derivatives/custom
