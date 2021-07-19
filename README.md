@@ -36,10 +36,9 @@ docker run -v /path/to/data/:/bids_dataset ghcr.io/rob-luke/fnirs-apps-glm-pipel
 1. The pipeline converts the data to optical density.
 2. Then applies the Beer Lambert Law conversion.
 4. The data is resampled
-    - to 0.6 Hz. (TODO: make optional variable)
+    - to 0.6 Hz. Use `--sample-rate X` to resample to user specified value.
 6. A GLM is applied
     - The model used is a glover HRF convolved with boxcar of stimulus duration
-    - (TODO: expose more parameters here)
     - If `--short-regression True` is specified the short channels will be added as regressors to the design matrix for the GLM computation.
     - Drift components will be added to the design matrix using a cosine model including frequencies up to 0.01 Hz (TODO: make user specified parameter).
 7. The results of the GLM will be exported per subject as a tidy csv file per run.
@@ -55,6 +54,7 @@ docker run -v /path/to/data/:/bids_dataset ghcr.io/rob-luke/fnirs-apps-glm-pipel
 |-------------------|----------|---------|-----------------------------------------------------|
 | short-regression  | optional | True    | Include short channels as regressor.                |
 | export-drifts     | optional | False   | Export the drift coefficients in csv.               |
+| sample-rate.      | optional | 0.6.    | Sample rate the data will be resampled to.          |
 | export-shorts     | optional | False   | Export the short channel coefficients in csv.       |
 | subject-label     | optional | []      | Sujects to process. Default is to process all.      |
 | task-label        | optional | []      | Tasks to process. Default is to process all.        |
