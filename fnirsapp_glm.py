@@ -16,7 +16,7 @@ import subprocess
 from mne.utils import logger
 import mne
 
-__version__ = "v0.3.0"
+__version__ = "v0.3.1"
 
 def fnirsapp_glm(command, env={}):
     merged_env = os.environ

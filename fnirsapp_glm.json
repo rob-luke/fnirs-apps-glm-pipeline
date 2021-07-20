@@ -2,11 +2,11 @@
     "name": "fNIRS Apps: GLM Pipeline",
     "description": "A GLM pipeline for fNIRS data",
     "author": "Robert Luke",
-    "tool-version": "v0.3.0",
+    "tool-version": "v0.3.1",
     "schema-version": "0.5",
     "command-line": "/run.py [InputDataset] [OutputLocation] [SubjectLabel] [TaskLabel] [ShortRegression] [ExportDrifts] [ExportShorts] [SampleRate]",
     "container-image": {
-        "image": "ghcr.io/rob-luke/fnirs-apps-glm-pipeline/app",
+        "image": "ghcr.io/rob-luke/fnirs-apps-glm-pipeline/app:v0.3.1",
         "index": "ghcr.io",
         "type": "docker",
         "entrypoint": true
