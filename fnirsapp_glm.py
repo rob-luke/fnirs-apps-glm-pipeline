@@ -3,7 +3,7 @@ import numpy as np
 import sys
 import argparse
 import pandas as pd
-from mne_bids import BIDSPath, read_raw_bids
+from mne_bids import BIDSPath, read_raw_bids, get_entity_vals
 from glob import glob
 import os.path as op
 from mne.preprocessing.nirs import optical_density, beer_lambert_law
@@ -15,8 +15,13 @@ import os
 import subprocess
 from mne.utils import logger
 import mne
+from pathlib import Path
+from datetime import datetime
+import json
+import hashlib
+from pprint import pprint
 
-__version__ = "v0.3.2"
+__version__ = "v0.3.3"
 
 def fnirsapp_glm(command, env={}):
     merged_env = os.environ
@@ -46,6 +51,14 @@ parser.add_argument('--subject-label',
                     'all subjects should be analyzed. Multiple participants '
                     'can be specified with a space separated list.',
                     nargs="+")
+parser.add_argument('--session-label',
+                    help='The label(s) of the session(s) that should be '
+                    'analyzed. The label corresponds to '
+                    'ses-<session-label> from the BIDS spec (so it does '
+                    'not include "ses-"). If this parameter is not provided '
+                    'all sessions should be analyzed. Multiple sessions '
+                    'can be specified with a space separated list.',
+                    nargs="+")
 parser.add_argument('--task-label',
                     help='The label(s) of the tasks(s) that should be '
                     'analyzed. If this parameter is not provided '
@@ -65,39 +78,60 @@ parser.add_argument('-v', '--version', action='version',
                     f'{__version__}')
 args = parser.parse_args()
 
-mne.set_log_level("INFO")
+def create_report(app_name=None, pargs=None):
+
+    exec_rep = dict()
+    exec_rep["ExecutionStart"] = datetime.now().isoformat()
+    exec_rep["ApplicationName"] = app_name
+    exec_rep["ApplicationVersion"] = __version__
+    exec_rep["Arguments"] = vars(pargs)
+
+    return exec_rep
+
+exec_files = dict()
+exec_rep = create_report(app_name="fNIRS-Apps: GLM Pipeline", pargs=args)
+pprint(exec_rep)
+
+mne.set_log_level("DEBUG")
 logger.info("\n")
 
 ########################################
 # Extract parameters
 ########################################
 
-
-ids = []
-# only for a subset of subjects
+logger.info("Extracting subject metadata.")
+subs = []
 if args.subject_label:
-    ids = args.subject_label
-    print(f"Processing requested participants: {ids}")
-# for all subjects
+    logger.info("    Subject data provided as input argument.")
+    subs = args.subject_label
 else:
-    subject_dirs = glob(op.join(args.input_datasets, "sub-*"))
-    ids = [subject_dir.split("-")[-1] for
-           subject_dir in subject_dirs]
-    print(f"No participants specified, processing: {ids}")
+    logger.info("    Subject data will be extracted from data.")
+    subs = get_entity_vals(args.input_datasets, 'subject')
+logger.info(f"        Subjects: {subs}")
 
 
+logger.info("Extracting session metadata.")
+sess = []
+if args.session_label:
+    logger.info("    Session data provided as input argument.")
+    sess = args.session_label
+else:
+    logger.info("    Session data will be extracted from data.")
+    sess = get_entity_vals(args.input_datasets, 'session')
+if len(sess) == 0:
+    sess = [None]
+logger.info(f"        Sessions: {sess}")
+
+
+logger.info("Extracting tasks metadata.")
 tasks = []
 if args.task_label:
+    logger.info("    Task data provided as input argument.")
     tasks = args.task_label
-    print(f"Processing requested tasks: {tasks}")
 else:
-    all_snirfs = glob(f"{args.input_datasets}/**/*_nirs.snirf", recursive=True)
-    for a in all_snirfs:
-        s = a.split("_task-")[1]
-        s = s.split("_nirs.snirf")[0]
-        tasks.append(s)
-    tasks = np.unique(tasks)
-    print(f"No tasks specified, processing {tasks}")
+    logger.info("    Session data will be extracted from data.")
+    tasks = get_entity_vals(args.input_datasets, 'task')
+logger.info(f"        Tasks: {tasks}")
 
 
 ########################################
@@ -116,6 +150,7 @@ def individual_analysis(bids_path, ID, srate=0.6, short=True):
 
     # Cut out just the short channels for creating a GLM repressor
     if short:
+        logger.debug("    Extracting short channel")
         sht_chans = get_short_channels(raw_haemo)
     raw_haemo = get_long_channels(raw_haemo)
 
@@ -164,37 +199,48 @@ def individual_analysis(bids_path, ID, srate=0.6, short=True):
 ########################################
 
 print(" ")
+
 df_cha = pd.DataFrame()
 df_roi = pd.DataFrame()
-for id in ids:
-    for task in tasks:
-        b_path = BIDSPath(subject=id, task=task,
-                          root=f"{args.input_datasets}",
-                          datatype="nirs", suffix="nirs",
-                          extension=".snirf")
-        try:
-            raw, cha, roi = individual_analysis(b_path, id,
-                                                short=args.short_regression,
-                                                srate=args.sample_rate)
-            p_out = b_path.update(root=f"{args.output_location}",
-                                  extension='.csv',
-                                  suffix='glm', check=False)
-            p_out.fpath.parent.mkdir(exist_ok=True, parents=True)
 
-            if args.export_drifts is False:
-                cha = cha[~cha.Condition.str.contains("drift")]
-                cha = cha[~cha.Condition.str.contains("constant")]
-            if args.export_shorts is False:
-                cha = cha[~cha.Condition.str.contains("short")]
-            print(f"Writing subject results to: {p_out.fpath}")
-            cha.to_csv(p_out.fpath, index=False)
-            df_cha = df_cha.append(cha)
-            df_roi = df_roi.append(roi)
-        except FileNotFoundError:
-            print(f"Unable to process {b_path.fpath}")
+for sub in subs:
+    for task in tasks:
+        for ses in sess:
+
+            logger.info(f"Processing: sub-{sub}/ses-{ses}/task-{task}")
+            exec_files[f"sub-{sub}_ses-{ses}_task-{task}"] = dict()
+
+            b_path = BIDSPath(subject=sub, task=task, session=ses,
+                              root=f"{args.input_datasets}",
+                              datatype="nirs", suffix="nirs",
+                              extension=".snirf")
+            try:
+
+                exec_files[f"sub-{sub}_ses-{ses}_task-{task}"]["FileName"] = str(b_path.fpath)
+                exec_files[f"sub-{sub}_ses-{ses}_task-{task}"]["FileHash"] = hashlib.md5(open(b_path.fpath, 'rb').read()).hexdigest()
+
+                raw, cha, roi = individual_analysis(b_path, id,
+                                                    short=args.short_regression,
+                                                    srate=args.sample_rate)
+                p_out = b_path.update(root=f"{args.output_location}",
+                                      extension='.csv',
+                                      suffix='glm', check=False)
+                p_out.fpath.parent.mkdir(exist_ok=True, parents=True)
+
+                if args.export_drifts is False:
+                    cha = cha[~cha.Condition.str.contains("drift")]
+                    cha = cha[~cha.Condition.str.contains("constant")]
+                if args.export_shorts is False:
+                    cha = cha[~cha.Condition.str.contains("short")]
+                print(f"Writing subject results to: {p_out.fpath}")
+                cha.to_csv(p_out.fpath, index=False)
+                df_cha = df_cha.append(cha)
+                df_roi = df_roi.append(roi)
+            except FileNotFoundError:
+                print(f"Unable to process {b_path.fpath}")
           
           
-if len(ids) > 2:
+if len(subs) > 2:
 
   print("Computing group level result per conditions as single ROI.")
   df_roi = df_roi[~df_roi.Condition.str.contains("drift")]
@@ -206,3 +252,12 @@ if len(ids) > 2:
   sys.stdout = open(f"{args.output_location}/stats.txt", "w")
   print(roi_model.summary())
   sys.stdout.close()
+
+exec_rep["Files"] = exec_files
+exec_path = f"{args.input_datasets}/execution"
+exec_rep["ExecutionEnd"] = datetime.now().isoformat()
+
+Path(exec_path).mkdir(parents=True, exist_ok=True)
+with open(f"{exec_path}/{exec_rep['ExecutionStart'].replace(':', '-')}-glm.json", "w") as fp:
+    json.dump(exec_rep, fp)
+
