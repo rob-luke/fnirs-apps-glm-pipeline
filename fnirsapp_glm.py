@@ -16,7 +16,7 @@ import subprocess
 from mne.utils import logger
 import mne
 
-__version__ = "v0.3.1"
+__version__ = "v0.3.2"
 
 def fnirsapp_glm(command, env={}):
     merged_env = os.environ
@@ -115,7 +115,8 @@ def individual_analysis(bids_path, ID, srate=0.6, short=True):
     raw_haemo.resample(srate, verbose=True)
 
     # Cut out just the short channels for creating a GLM repressor
-    sht_chans = get_short_channels(raw_haemo)
+    if short:
+        sht_chans = get_short_channels(raw_haemo)
     raw_haemo = get_long_channels(raw_haemo)
 
     if ~np.all(raw_haemo.annotations.duration ==
