@@ -6,7 +6,7 @@
     "schema-version": "0.5",
     "command-line": "/run.py [InputDataset] [OutputLocation] [SubjectLabel] [TaskLabel] [ShortRegression] [ExportDrifts] [ExportShorts] [SampleRate]",
     "container-image": {
-        "image": "ghcr.io/rob-luke/fnirs-apps-glm-pipeline/app:v0.3.1",
+        "image": "ghcr.io/rob-luke/fnirs-apps-glm-pipeline/app:v0.3.2",
         "index": "ghcr.io",
         "type": "docker",
         "entrypoint": true
