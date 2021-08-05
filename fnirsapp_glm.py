@@ -38,7 +38,19 @@ def fnirsapp_glm(command, env={}):
     if process.returncode != 0:
         raise Exception("Non zero return code: %d" % process.returncode)
 
-parser = argparse.ArgumentParser(description='Quality Reports')
+
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
+
+parser = argparse.ArgumentParser(description='GLM')
 parser.add_argument('--input-datasets', default="/bids_dataset", type=str,
                     help='The directory with the input dataset formatted according to the BIDS standard.')
 parser.add_argument('--output-location', default="/bids_dataset/derivatives/fnirs-apps-glm-pipeline",
@@ -65,18 +77,19 @@ parser.add_argument('--task-label',
                     'all tasks should be analyzed. Multiple tasks '
                     'can be specified with a space separated list.',
                     nargs="+")
-parser.add_argument('--short-regression', type=bool, default=True,
+parser.add_argument('--short-regression', type=str2bool, default=True,
                     help='Include short channels as regressors.')
 parser.add_argument('--sample-rate', type=float, default=0.6,
                     help='Sample rate to resample data to (Hz).')
-parser.add_argument('--export-drifts', type=bool, default=False,
+parser.add_argument('--export-drifts', type=str2bool, default=False,
                     help='Export the drift coefficients in csv.')
-parser.add_argument('--export-shorts', type=bool, default=False,
+parser.add_argument('--export-shorts', type=str2bool, default=False,
                     help='Export the short channel coefficients in csv.')
 parser.add_argument('-v', '--version', action='version',
                     version='BIDS-App Scalp Coupling Index version '
                     f'{__version__}')
 args = parser.parse_args()
+
 
 def create_report(app_name=None, pargs=None):
 
@@ -92,7 +105,7 @@ exec_files = dict()
 exec_rep = create_report(app_name="fNIRS-Apps: GLM Pipeline", pargs=args)
 pprint(exec_rep)
 
-mne.set_log_level("DEBUG")
+mne.set_log_level("INFO")
 logger.info("\n")
 
 ########################################
@@ -148,9 +161,8 @@ def individual_analysis(bids_path, ID, srate=0.6, short=True):
     logger.info(f"    Resampling to {srate} Hz")
     raw_haemo.resample(srate, verbose=True)
 
-    # Cut out just the short channels for creating a GLM repressor
     if short:
-        logger.debug("    Extracting short channel")
+        # Cut out just the short channels for creating a GLM repressor
         sht_chans = get_short_channels(raw_haemo)
     raw_haemo = get_long_channels(raw_haemo)
 
@@ -219,7 +231,7 @@ for sub in subs:
                 exec_files[f"sub-{sub}_ses-{ses}_task-{task}"]["FileName"] = str(b_path.fpath)
                 exec_files[f"sub-{sub}_ses-{ses}_task-{task}"]["FileHash"] = hashlib.md5(open(b_path.fpath, 'rb').read()).hexdigest()
 
-                raw, cha, roi = individual_analysis(b_path, id,
+                raw, cha, roi = individual_analysis(b_path, sub,
                                                     short=args.short_regression,
                                                     srate=args.sample_rate)
                 p_out = b_path.update(root=f"{args.output_location}",
