@@ -9,7 +9,7 @@ RUN pip install h5py
 RUN pip install h5io
 RUN pip install statsmodels
 RUN pip install seaborn
-RUN pip install tables
+
 
 COPY fnirsapp_glm.py /run.py
 RUN chmod +x /run.py
